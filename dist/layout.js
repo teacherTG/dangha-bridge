@@ -13,7 +13,7 @@
   $('mPages').onclick = () => $('pages').showModal();
   $('closepages').onclick = () => $('pages').close();
   $('mPrev').onclick = () => go(Math.max(0, page - 1));
-  $('mNext').onclick = () => go(Math.min(7, page + 1));
+  $('mNext').onclick = () => go(Math.min(TOTAL - 1, page + 1));
 
   // 바텀 시트/대화상자 바깥(배경) 탭으로 닫기
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => {
@@ -37,10 +37,10 @@
   render = function () {
     prevRender();
     document.body.classList.toggle('is-admin', admin);
-    $('mCount').textContent = `${page + 1} / 8면`;
+    $('mCount').textContent = `${page + 1} / ${TOTAL}면`;
     $('mSection').textContent = sections[page];
     $('mPrev').disabled = page === 0;
-    $('mNext').disabled = page === 7;
+    $('mNext').disabled = page === TOTAL - 1;
     document.querySelectorAll('#pagelist [data-page]').forEach(b => {
       const on = +b.dataset.page === page;
       b.classList.toggle('active', on);
@@ -70,7 +70,7 @@
     const t = e.target;
     if (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName) || document.querySelector('dialog[open]')) return;
     e.preventDefault();
-    go(e.key === 'ArrowLeft' ? Math.max(0, page - 1) : Math.min(7, page + 1));
+    go(e.key === 'ArrowLeft' ? Math.max(0, page - 1) : Math.min(TOTAL - 1, page + 1));
   });
 
   // 모바일/터치: 지면을 좌우로 밀어 면 넘기기 (편집 중인 글자 위에서는 동작하지 않음)
@@ -86,7 +86,7 @@
     const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
     if (Date.now() - st > 700 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
     if (window.getSelection && String(window.getSelection())) return;
-    if (dx < 0 && page < 7) go(page + 1);
+    if (dx < 0 && page < TOTAL - 1) go(page + 1);
     else if (dx > 0 && page > 0) go(page - 1);
   }, { passive: true });
 
