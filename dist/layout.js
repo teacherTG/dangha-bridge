@@ -1,9 +1,51 @@
-// 반응형 레이아웃 계층: PC와 모바일이 같은 기능(지면 이동, 편집, 사진, 백업, 인쇄)을 쓰되
-// 조작 방식과 배치만 기기에 맞게 바꿉니다. app.js/content.js의 로직은 그대로 재사용합니다.
+// 반응형 레이아웃 계층
+// - PC·태블릿(≥768px): 한 면을 A3 용지 한 장으로 보여 주고, 화면 그대로 A3로 인쇄합니다.
+// - 모바일(≤767px): 같은 기능을 앱형 화면(하단 이동 바, 목차 시트, 스와이프)으로 제공합니다.
+// app.js/content.js의 로직은 그대로 재사용합니다.
 (function () {
   const mqMobile = window.matchMedia('(max-width: 767px)');
-  const mqDesktop = window.matchMedia('(min-width: 1100px)');
   const isMobile = () => mqMobile.matches;
+  const PX_PER_MM = 96 / 25.4;
+  const SHEET_W = 297 * PX_PER_MM;
+
+  // A3 화면 배율: 창이 A3 폭보다 좁을 때만 축소(인쇄는 CSS에서 항상 100%)
+  function sheetZoom() {
+    const avail = document.querySelector('main').clientWidth - 40;
+    const z = isMobile() ? 1 : Math.min(1, avail / SHEET_W);
+    document.documentElement.style.setProperty('--sheet-zoom', z.toFixed(4));
+  }
+
+  // A3 한 장에 내용이 꼭 맞도록 본문 글자 크기(--fs)를 이분 탐색으로 조절
+  const FS_MIN = 7.5, FS_MAX = 13;
+  let warned = false;
+  function fitSheet() {
+    const p = $('paper');
+    if (isMobile() && !printing) { p.style.removeProperty('--fs'); p.classList.remove('overflow'); return; }
+    const fits = fs => { p.style.setProperty('--fs', fs + 'px'); return p.scrollHeight <= p.clientHeight + 1; };
+    let lo = FS_MIN, hi = FS_MAX;
+    if (fits(hi)) return p.classList.remove('overflow');
+    if (!fits(lo)) {
+      p.classList.add('overflow');
+      if (admin && !warned) { warned = true; toast('내용이 A3 한 장을 넘칩니다. 글을 조금 줄여 주세요.'); }
+      return;
+    }
+    p.classList.remove('overflow'); warned = false;
+    for (let i = 0; i < 9; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
+    fits(Math.floor(lo * 20) / 20);
+  }
+  function layoutSheet() { sheetZoom(); fitSheet(); }
+
+  // 인쇄 직전: 100% 배율로 다시 맞춘 뒤 인쇄, 끝나면 화면 배율 복원
+  let printing = false;
+  window.addEventListener('beforeprint', () => { printing = true; document.documentElement.style.setProperty('--sheet-zoom', '1'); fitSheet(); });
+  window.addEventListener('afterprint', () => { printing = false; layoutSheet(); });
+
+  // 편집 중 글이 늘거나 사진·글꼴이 늦게 로드되면 다시 맞춤
+  let fitTimer;
+  const refit = () => { clearTimeout(fitTimer); fitTimer = setTimeout(layoutSheet, 120); };
+  $('paper').addEventListener('input', refit);
+  $('paper').addEventListener('load', refit, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
 
   // 모바일 지면 목차(바텀 시트) — data-page 속성이 있어 render()가 이동 핸들러를 연결합니다.
   $('pagelist').innerHTML = sections.map((s, i) =>
@@ -26,9 +68,9 @@
   go = function (n) {
     page = n;
     render();
+    if (!isMobile()) { $('nav').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     const header = document.querySelector('.top').offsetHeight;
-    const target = isMobile() ? $('paper') : document.querySelector('main');
-    const y = target.getBoundingClientRect().top + window.scrollY - header - 12;
+    const y = $('paper').getBoundingClientRect().top + window.scrollY - header - 12;
     window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
   };
 
@@ -54,6 +96,7 @@
       if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2;
     }
     syncSavebar();
+    layoutSheet();
   };
 
   // 편집 모드에서 모바일 하단 바들이 겹치지 않도록 저장 바 높이를 CSS 변수로 전달
@@ -61,7 +104,7 @@
     const h = admin ? $('savebar').offsetHeight : 0;
     document.documentElement.style.setProperty('--savebar-h', h + 'px');
   }
-  window.addEventListener('resize', syncSavebar);
+  window.addEventListener('resize', () => { syncSavebar(); refit(); });
 
   // PC: 키보드 좌우 화살표로 면 넘기기
   document.addEventListener('keydown', e => {
@@ -103,7 +146,6 @@
   // 화면 크기가 바뀌면(회전 등) 다시 그려 칩 위치·바 높이 갱신
   const rerender = () => render();
   mqMobile.addEventListener ? mqMobile.addEventListener('change', rerender) : mqMobile.addListener(rerender);
-  mqDesktop.addEventListener ? mqDesktop.addEventListener('change', rerender) : mqDesktop.addListener(rerender);
 
   render();
 })();
