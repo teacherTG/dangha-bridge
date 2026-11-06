@@ -7,9 +7,10 @@ function photo(key,label='사진',seed){let p=data[key],btn=admin?`<button data-
 // 기사별 사진 키. 예전 지면의 대표 사진(p0photo 등)은 첫 칸으로 이어 씁니다.
 function slotKey(key,i){return i===1&&/^p\da$/.test(key)?key.slice(0,2)+'photo':key+'photo'+i}
 function shotCount(key,n){return Math.max(seeds[key]?.length||0,n)}
+// wide가 'grid3'이면 작은 사진을 3열×2줄로, 위→아래 다음 열 순서로 채웁니다(열마다 한 묶음).
 // 사진이 든 기사는 줄마다 높이를 맞추고 원본 비율대로 폭을 나눕니다. 홀수 장이면 첫 사진을 크게 둡니다.
 function rowSizes(n,wide){return Array.isArray(wide)?wide:wide==='strip'||wide==='inline'?[n]:wide?[n>>1,n-(n>>1)]:[...(n%2?[1]:[]),...Array(n>>1).fill(2)]}
-function shots(key,n,wide){n=shotCount(key,n);const s=seeds[key];let i=0;if(s)return `<div class="shots rows" data-n="${n}">${rowSizes(n,wide).map(c=>`<div class="shotrow">${Array.from({length:c},()=>{i++;return photo(slotKey(key,i),'행사 사진 '+i,s[i-1])}).join('')}</div>`).join('')}</div>`;return n?`<div class="shots" data-n="${n}">${Array.from({length:n},(_,i)=>photo(slotKey(key,i+1),'행사 사진 '+(i+1))).join('')}</div>`:''}
+function shots(key,n,wide){n=shotCount(key,n);const s=seeds[key];let i=0;if(wide==='grid3')return `<div class="shots grid3" data-n="${n}">${Array.from({length:n},(_,j)=>photo(slotKey(key,j+1),'행사 사진 '+(j+1),s?.[j])).join('')}</div>`;if(s)return `<div class="shots rows" data-n="${n}">${rowSizes(n,wide).map(c=>`<div class="shotrow">${Array.from({length:c},()=>{i++;return photo(slotKey(key,i),'행사 사진 '+i,s[i-1])}).join('')}</div>`).join('')}</div>`;return n?`<div class="shots" data-n="${n}">${Array.from({length:n},(_,i)=>photo(slotKey(key,i+1),'행사 사진 '+(i+1))).join('')}</div>`:''}
 function waiting(key,body){return !body&&!data[key+'b']}
 function item([key,title,body,n=0,wide]){const w=waiting(key,body),need=w?'<span class="need">내용 필요</span>':'',t=editable(key+'t',title,'h4'),b=editable(key+'b',body),s=shots(key,n,wide);return `<article class="item${w?' waiting':''}${wide?' '+wide:''}">${wide==='wide'?`<div>${need}${t}${b}</div>${s}`:need+t+s+b}</article>`}
 // 기사 순서를 지키면서 각 단의 분량이 비슷해지도록 나눕니다(위→아래, 왼쪽→오른쪽 순서로 읽힘).
