@@ -95,3 +95,6 @@
 /* 3면 축제: 사진 6칸(3열×2줄)과 넓은 기사 자리 */
 .shots[data-n="6"]:not(.rows){grid-template-columns:repeat(3,1fr)}.shots[data-n="6"]:not(.rows) .photo{height:110px}[data-key="p5efestivalb"]:empty{min-height:var(--festh,220px)}
 @media screen and (max-width:700px){.shots[data-n="6"]:not(.rows) .photo{height:84px}[data-key="p5efestivalb"]:empty{min-height:160px}}
+/* 2면 체육한마당: 사진 폭을 줄이고 글자를 키워 사진과 본문 높이를 맞춤 · 학생자치 이야기 제목 키움 */
+@media (min-width:701px){.lead.compact{grid-template-columns:.4fr 1fr}.lead.compact p{font-size:14px}.council .item h4,.council .sgreets h4{font-size:18px;line-height:1.4}}
+@media screen and (max-width:700px){.council .item h4,.council .sgreets h4{font-size:20px}}
