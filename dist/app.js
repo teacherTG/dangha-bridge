@@ -28,7 +28,7 @@ function render(){const pg=pages[page],n=pages.length;
  else if(pg.lead)h+=lead(pg.lead);
  if(pg.trip)h+=trip(pg.trip);
  if(pg.sections)h+=`<div class="secs">${pg.sections.map(section).join('')}</div>`;
- if(pg.clubs)h+=`<header class="sechead club-head"><h3>서로 다른 관심, 함께 빛나는 우리</h3><span>CLUB STORIES · 01—${clubs.length}</span></header><div class="clubs">${clubs.map((c,i)=>`<article class="club${waiting('c'+i,clubText[i])?' waiting':''}"><span class="num">${String(i+1).padStart(2,'0')}</span>${editable('c'+i+'t',c,'h4')}${photo('c'+i+'photo','활동사진')}${editable('c'+i+'b',clubText[i]??'')}</article>`).join('')}</div>`;
+ if(pg.clubs)h+=`<header class="sechead club-head"><h3>서로 다른 관심, 함께 빛나는 우리</h3><span>CLUB STORIES · 01—${clubs.length}</span></header><div class="clubs">${clubs.map((c,i)=>`<article class="club${waiting('c'+i,clubText[i])?' waiting':''}"><span class="num">${String(i+1).padStart(2,'0')}</span>${editable('c'+i+'t',c,'h4')}${photo('c'+i+'photo',c+' 활동사진',clubSeeds[i])}${editable('c'+i+'b',clubText[i]??'')}</article>`).join('')}</div>`;
  h+=`<div class="folio"><span>DANGHA BRIDGE · 2026</span><span>${String(page+1).padStart(2,'0')}</span></div>`;
  $('paper').innerHTML=`<div class="fit">${h}</div>`;$('savebar').hidden=!admin;
  document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(+b.dataset.page));document.querySelectorAll('[data-key]').forEach(el=>el.oninput=()=>{data[el.dataset.key]=el.innerText});document.querySelectorAll('[data-photo]').forEach(b=>b.onclick=()=>openCrop(b.dataset.photo));fitPaper()}
