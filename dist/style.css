@@ -95,3 +95,7 @@
 /* 3면 축제: 사진 6칸(3열×2줄)과 넓은 기사 자리 */
 .shots[data-n="6"]:not(.rows){grid-template-columns:repeat(3,1fr)}.shots[data-n="6"]:not(.rows) .photo{height:110px}[data-key="p5efestivalb"]:empty{min-height:var(--festh,220px)}
 @media screen and (max-width:700px){.shots[data-n="6"]:not(.rows) .photo{height:84px}[data-key="p5efestivalb"]:empty{min-height:160px}}
+
+/* 학생자치 인사말: 가로 사진(단체 사진)을 넣은 칸은 사진 자리를 4:3으로 넓힙니다. */
+.sgreets .greeting.wide-photo{grid-template-columns:150px 1fr}.greeting.wide-photo>.photo{aspect-ratio:4/3}.greeting>.photo img{object-fit:cover}
+@media screen and (max-width:700px){.sgreets .greeting.wide-photo>.photo{width:150px!important}}
