@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);let page=0,admin=false,selected='',source=null;let data={};try{data=JSON.parse(localStorage.getItem('dangha2026')||'{}')}catch{}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function editable(key,val,tag='p',cls=''){return `<${tag} class="${cls}" data-key="${key}" ${admin?'contenteditable="true"':''}>${esc(data[key]??val)}</${tag}>`}
+function editable(key,val,tag='p',cls=''){const v=String(data[key]??val),body=tag==='p'&&cls!=='sign'&&v.trim()?v.split('\n').map(l=>`<span class="pr">${esc(l)}</span>`).join(''):esc(v);return `<${tag} class="${cls}" data-key="${key}" ${admin?'contenteditable="true"':''}>${body}</${tag}>`}
 // 사진 칸: 브라우저에 등록한 사진, 지면 기본 사진(seeds), 빈 사진 자리 순으로 표시합니다.
 const seedSrc={};
 function photo(key,label='사진',seed){let p=data[key],btn=admin?`<button data-photo="${key}">＋ 사진 편집</button>`:'';if(seed)seedSrc[key]='photos/'+seed[0];if(p)return `<div class="photo filled" style="--r:${p.ratio};width:${p.width}%;aspect-ratio:${p.ratio};border-radius:${p.radius}"><img src="${p.url}" alt="편집자가 등록한 소식지 사진">${btn}</div>`;if(seed)return `<div class="photo seeded" style="--r:${seed[1]}"><img src="${seedSrc[key]}" alt="${label}">${btn}</div>`;return `<div class="photo ph"><span class="photo-symbol">▧</span><span>${label}</span>${btn}</div>`}

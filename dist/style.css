@@ -99,3 +99,6 @@
 /* 학생자치 인사말: 가로 사진(단체 사진)을 넣은 칸은 사진 자리를 4:3으로 넓힙니다. */
 .sgreets .greeting.wide-photo{grid-template-columns:150px 1fr}.greeting.wide-photo>.photo{aspect-ratio:4/3}.greeting>.photo img{object-fit:cover}
 @media screen and (max-width:700px){.sgreets .greeting.wide-photo>.photo{width:150px!important}}
+
+/* 신문처럼 문단 첫 줄 들여쓰기 */
+.pr{display:block;text-indent:1em}.pr:empty::before{content:"\200b"}.symcell:first-child .pr{text-indent:0}
